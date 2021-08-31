@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace ProjectLibrary.Data.Interfaces
 {
-    public interface IBooksService
+    public interface IBooksRepository
     {
         IEnumerable<Book> GetAll();
-        IEnumerable<Book> GetByGenre(string genre);
-        void Add(Book book);
-        void Delete(Book book);
+        Book Get(int id);
+        void Create(Book book);
+        void Update(Book book);
+        void Delete(int id);
     }
 }
