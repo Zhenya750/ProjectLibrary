@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProjectLibrary.Data.Interfaces;
+using ProjectLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,36 +12,72 @@ namespace ProjectLibrary.Controllers
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
+        private IBooksRepository repository;
+
+        public BooksController(IBooksRepository repository)
+        {
+            this.repository = repository;
+        }
+
         // GET: api/books
         [HttpGet]
-        public IEnumerable<string> Get()
+        public JsonResult Get()
         {
-            throw new NotImplementedException();
+            return new JsonResult(repository.GetAll());
         }
 
         // GET api/books/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public JsonResult Get(int id)
+        { 
+            var book = repository.Get(id);
+
+            if (book != null)
+            {
+                return new JsonResult(book);
+            }
+
+            return new JsonResult($"Book with id {id} was not found");
+        }
+
+        // GET api/books/genre
+        [HttpGet("genre/{genre}")]
+        public JsonResult Get(string genre)
         {
-            throw new NotImplementedException();
+            return new JsonResult(repository
+                .GetAll()
+                .Where(book => book.Genres.Contains(genre)));
         }
 
         // POST api/books
         [HttpPost]
-        public void Post([FromBody] string value)
+        public JsonResult Post([FromBody] Book book)
         {
+            repository.Create(book);
+            return new JsonResult($"book {book} was created");
         }
 
         // PUT api/books
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        public JsonResult Put([FromBody] Book book)
         {
+            var oldBook = repository.Get(book.Id);
+
+            if (oldBook != null)
+            {
+                repository.Update(book);
+                return new JsonResult($"book was updated to {book}");
+            }
+
+            return new JsonResult($"can't update book to {book}");
         }
 
         // DELETE api/books/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public JsonResult Delete(int id)
         {
+            repository.Delete(id);
+            return new JsonResult($"book with id {id} was deleted");
         }
     }
 }

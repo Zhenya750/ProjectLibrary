@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ProjectLibrary.Data;
+using ProjectLibrary.Data.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +26,9 @@ namespace ProjectLibrary
 
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
+
+            services.AddSingleton<IBooksRepository, BooksMemoryRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
