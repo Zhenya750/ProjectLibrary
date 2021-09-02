@@ -10,7 +10,7 @@ namespace ProjectLibrary.Data.Interfaces
     {
         IEnumerable<Book> GetAll();
         Book Get(int id);
-        void Create(Book book);
+        Book Create(Book book);
         void Update(Book book);
         void Delete(int id);
     }

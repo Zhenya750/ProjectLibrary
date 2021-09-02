@@ -31,9 +31,17 @@ namespace ProjectLibrary.Data
             return books.Find(book => book.Id == id);
         }
 
-        public void Create(Book book)
+        public Book Create(Book book)
         {
+            int index = books.FindIndex(addedBook => addedBook.Id == book.Id);
+
+            if (index >= 0)
+            {
+                return null;
+            }
+
             books.Add(book);
+            return book;
         }
 
         public void Update(Book book)
