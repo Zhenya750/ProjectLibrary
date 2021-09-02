@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProjectLibrary.Data.Interfaces;
 using ProjectLibrary.Models;
 using System;
@@ -10,6 +11,7 @@ namespace ProjectLibrary.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BooksController : ControllerBase
     {
         private IBooksRepository repository;
