@@ -21,63 +21,69 @@ namespace ProjectLibrary.Controllers
 
         // GET: api/books
         [HttpGet]
-        public JsonResult Get()
+        public IActionResult Get()
         {
-            return new JsonResult(repository.GetAll());
+            return Ok(repository.GetAll());
         }
 
         // GET api/books/5
         [HttpGet("{id}")]
-        public JsonResult Get(int id)
+        public IActionResult Get(int id)
         { 
             var book = repository.Get(id);
 
             if (book != null)
             {
-                return new JsonResult(book);
+                return Ok(book);
             }
 
-            return new JsonResult($"Book with id {id} was not found");
+            return NotFound(id);
         }
 
         // GET api/books/genre
         [HttpGet("genre/{genre}")]
-        public JsonResult Get(string genre)
+        public IActionResult Get(string genre)
         {
-            return new JsonResult(repository
+            var books = repository
                 .GetAll()
-                .Where(book => book.Genres.Contains(genre)));
+                .Where(book => book.Genres.Contains(genre));
+
+            return Ok(books);
         }
 
         // POST api/books
         [HttpPost]
-        public JsonResult Post([FromBody] Book book)
+        public IActionResult Post([FromBody] Book book)
         {
-            repository.Create(book);
-            return new JsonResult($"book {book} was created");
+            var created = repository.Create(book);
+
+            if (created != null)
+            {
+                string url = Url.Action().ToLower() + "/" + created.Id;
+                return Created(url, created);
+            }
+
+            return Ok(book);
         }
 
         // PUT api/books
         [HttpPut]
-        public JsonResult Put([FromBody] Book book)
+        public IActionResult Put([FromBody] Book book)
         {
-            var oldBook = repository.Get(book.Id);
+            repository.Update(book);
 
-            if (oldBook != null)
-            {
-                repository.Update(book);
-                return new JsonResult($"book was updated to {book}");
-            }
-
-            return new JsonResult($"can't update book to {book}");
+            // always return NoContent, cause PUT is idempotent
+            return NoContent();
         }
 
         // DELETE api/books/5
         [HttpDelete("{id}")]
-        public JsonResult Delete(int id)
+        public IActionResult Delete(int id)
         {
             repository.Delete(id);
-            return new JsonResult($"book with id {id} was deleted");
+
+            // always return NoContent, cause DELETE is idempotent
+            return NoContent();
         }
     }
 }
