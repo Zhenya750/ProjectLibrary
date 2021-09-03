@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using ProjectLibrary.Models.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,10 +9,8 @@ using System.Threading.Tasks;
 
 namespace ProjectLibrary.Models
 {
-    public class Book
+    public class Book : BaseModel
     {
-        public int Id { get; set; }
-
         [Required]
         public string Name { get; set; }
 
