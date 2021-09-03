@@ -14,25 +14,26 @@ namespace ProjectLibrary.Controllers
     [Authorize]
     public class BooksController : ControllerBase
     {
-        private IBooksRepository repository;
+        private IRepository<User> repository;
 
-        public BooksController(IBooksRepository repository)
+        public BooksController(IRepository<User> repository)
         {
             this.repository = repository;
         }
 
         // GET: api/books
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult GetAll()
         {
-            return Ok(repository.GetAll());
+            return Ok(GetAuthorizedUser().Books);
         }
 
         // GET api/books/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        { 
-            var book = repository.Get(id);
+        public IActionResult GetById(string id)
+        {
+            var user = GetAuthorizedUser();
+            var book = user.Books.FirstOrDefault(book => book.Id == id);
 
             if (book != null)
             {
@@ -44,10 +45,11 @@ namespace ProjectLibrary.Controllers
 
         // GET api/books/genre
         [HttpGet("genre/{genre}")]
-        public IActionResult Get(string genre)
+        public IActionResult GetByGenre(string genre)
         {
-            var books = repository
-                .GetAll()
+            var user = GetAuthorizedUser();
+
+            var books = user.Books
                 .Where(book => book.Genres.Contains(genre));
 
             return Ok(books);
@@ -57,35 +59,56 @@ namespace ProjectLibrary.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Book book)
         {
-            var created = repository.Create(book);
+            var user = GetAuthorizedUser();
 
-            if (created != null)
-            {
-                string url = Url.Action().ToLower() + "/" + created.Id;
-                return Created(url, created);
-            }
+            user.Books.Add(book);
+            repository.Update(user);
 
-            return Ok(book);
+            string url = Url.Action().ToLower() + "/" + book.Id;
+            return Created(url, book);
         }
 
         // PUT api/books
         [HttpPut]
         public IActionResult Put([FromBody] Book book)
         {
-            repository.Update(book);
+            var user = GetAuthorizedUser();
+            int index = user.Books.FindIndex(old => old.Id == book.Id);
 
-            // always return NoContent, cause PUT is idempotent
+            if (index >= 0)
+            {
+                user.Books[index] = book;
+                repository.Update(user);
+            }
+
             return NoContent();
         }
 
         // DELETE api/books/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
-            repository.Delete(id);
+            var user = GetAuthorizedUser();
+            var bookToDelete = user.Books.FirstOrDefault(book => book.Id == id);
 
-            // always return NoContent, cause DELETE is idempotent
+            if (bookToDelete != null)
+            {
+                user.Books.Remove(bookToDelete);
+                repository.Update(user);
+            }
+
             return NoContent();
+        }
+
+        private User GetAuthorizedUser()
+        {
+            string login = User.Identity.Name;
+
+            var user = repository
+                .GetAll()
+                .FirstOrDefault(user => user.Auth.Login == login);
+
+            return user;
         }
     }
 }

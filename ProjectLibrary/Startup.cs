@@ -15,6 +15,8 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectLibrary.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace ProjectLibrary
 {
@@ -48,7 +50,8 @@ namespace ProjectLibrary
                     };
                 });
 
-            services.AddSingleton<IBooksRepository, BooksMemoryRepository>();
+            services.AddSingleton<IRepository<User>, MongoRepository<User>>();
+            services.AddTransient<IPasswordHasher<AuthInfo>, PasswordHasher<AuthInfo>>();
 
             services.AddControllers();
         }
