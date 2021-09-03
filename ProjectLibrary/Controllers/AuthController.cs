@@ -10,6 +10,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ProjectLibrary.Data.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace ProjectLibrary.Controllers
 {
@@ -17,51 +19,99 @@ namespace ProjectLibrary.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly List<User> users;
         private IConfiguration configuration;
+        private IRepository<User> repository;
+        private IPasswordHasher<AuthInfo> hasher;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, IRepository<User> repository, IPasswordHasher<AuthInfo> hasher)
         {
-            users = new List<User>
-            {
-                new User { Id = 0, Login = "log1", Password = "pass1" },
-                new User { Id = 1, Login = "log2", Password = "pass2" },
-                new User { Id = 2, Login = "log3", Password = "pass3" },
-            };
-
             this.configuration = configuration;
+            this.repository = repository;
+            this.hasher = hasher;
         }
 
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] User user)
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] AuthInfo auth)
         {
-            var identity = GetIdentity(user);
-
-            if (identity == null)
+            if (LoginAlreadyExists(auth))
             {
-                return Unauthorized(user);
+                return Conflict();
             }
 
+            auth.Password = hasher.HashPassword(auth, auth.Password);
+
+            var newUser = repository.Create(
+                new User 
+                { 
+                    Auth = auth, 
+                    Books = new List<Book>()
+                });
+
+            if (newUser == null)
+            {
+                return Conflict();
+            }
+
+            var identity = GetIdentity(auth);
             string encodedJwt = GetEncodedJwt(identity);
 
             return Ok(encodedJwt);
         }
 
-        private ClaimsIdentity GetIdentity(User user)
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] AuthInfo auth)
         {
-            var existed = users.FirstOrDefault(u => u.Login == user.Login && u.Password == user.Password);
-
-            if (existed != null)
+            if (IsUserRegistered(auth) == false)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, existed.Login),
-                };
-
-                return new ClaimsIdentity(claims, "Token");
+                return Unauthorized(auth);
             }
 
-            return null;
+            var identity = GetIdentity(auth);
+            string encodedJwt = GetEncodedJwt(identity);
+
+            return Ok(encodedJwt);
+        }
+
+        private bool LoginAlreadyExists(AuthInfo auth)
+        {
+            var existedUser = repository
+                .GetAll()
+                .FirstOrDefault(user => user.Auth.Login == auth.Login);
+
+            return existedUser != null;
+        }
+
+        private bool IsUserRegistered(AuthInfo auth)
+        {
+            var users = repository.GetAll();
+
+            foreach (var user in users)
+            {
+                if (user.Auth.Login == auth.Login)
+                {
+                    var result = hasher.VerifyHashedPassword(
+                        user: auth, 
+                        hashedPassword: user.Auth.Password, 
+                        providedPassword: auth.Password);
+
+                    if (result == PasswordVerificationResult.Success)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private ClaimsIdentity GetIdentity(AuthInfo auth)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimsIdentity.DefaultNameClaimType, auth.Login),
+            };
+
+            return new ClaimsIdentity(claims, "Token");
         }
 
         private string GetEncodedJwt(ClaimsIdentity identity)
