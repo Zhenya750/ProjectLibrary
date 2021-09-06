@@ -9,7 +9,7 @@ A RESTful service to let users manage their libraries with the following operati
 
 Stack: 
 - ASP.NET Core 5.0 Web API
-- MongoDB
+- MongoDB 4.4.9
 
 How to launch:
 -----------------------------
