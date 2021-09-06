@@ -1,16 +1,13 @@
 ﻿using ProjectLibrary.Data.Interfaces;
-using ProjectLibrary.Models;
 using ProjectLibrary.Models.Base;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectLibrary.Data
 {
     public class MemoryRepository<T> : IRepository<T> where T : BaseModel
     {
-        private List<T> models;
+        private readonly List<T> models;
 
         public MemoryRepository()
         {

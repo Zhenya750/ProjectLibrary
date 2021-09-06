@@ -1,11 +1,9 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using ProjectLibrary.Data.Interfaces;
 using ProjectLibrary.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectLibrary.Data
 {
@@ -13,9 +11,13 @@ namespace ProjectLibrary.Data
     {
         private IMongoCollection<T> models;
 
+        private readonly string databaseName = "mydb";
+        private readonly string host = "localhost";
+        private readonly string port = "27017";
+
         public MongoRepository()
         {
-            string connectionString = "mongodb://localhost:27017/mydb";
+            string connectionString = $"mongodb://{host}:{port}/{databaseName}";
 
             var connection = new MongoUrlBuilder(connectionString);
             var client = new MongoClient(connectionString);

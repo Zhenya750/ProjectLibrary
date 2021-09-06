@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ProjectLibrary.Models;
@@ -9,7 +8,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using ProjectLibrary.Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -19,9 +17,9 @@ namespace ProjectLibrary.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private IConfiguration configuration;
-        private IRepository<User> repository;
-        private IPasswordHasher<AuthInfo> hasher;
+        private readonly IConfiguration configuration;
+        private readonly IRepository<User> repository;
+        private readonly IPasswordHasher<AuthInfo> hasher;
 
         public AuthController(IConfiguration configuration, IRepository<User> repository, IPasswordHasher<AuthInfo> hasher)
         {

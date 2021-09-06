@@ -1,9 +1,5 @@
-﻿using ProjectLibrary.Models;
-using ProjectLibrary.Models.Base;
-using System;
+﻿using ProjectLibrary.Models.Base;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectLibrary.Data.Interfaces
 {

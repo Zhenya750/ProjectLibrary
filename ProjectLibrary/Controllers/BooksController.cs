@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProjectLibrary.Data.Interfaces;
 using ProjectLibrary.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectLibrary.Controllers
 {
@@ -14,7 +12,7 @@ namespace ProjectLibrary.Controllers
     [Authorize]
     public class BooksController : ControllerBase
     {
-        private IRepository<User> repository;
+        private readonly IRepository<User> repository;
 
         public BooksController(IRepository<User> repository)
         {
