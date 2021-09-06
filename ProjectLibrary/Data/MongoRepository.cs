@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using ProjectLibrary.Data.Interfaces;
 using ProjectLibrary.Models.Base;
 using System;
@@ -11,13 +12,9 @@ namespace ProjectLibrary.Data
     {
         private IMongoCollection<T> models;
 
-        private readonly string databaseName = "mydb";
-        private readonly string host = "localhost";
-        private readonly string port = "27017";
-
-        public MongoRepository()
+        public MongoRepository(IConfiguration configuration)
         {
-            string connectionString = $"mongodb://{host}:{port}/{databaseName}";
+            string connectionString = configuration.GetConnectionString("MongoDB");
 
             var connection = new MongoUrlBuilder(connectionString);
             var client = new MongoClient(connectionString);
